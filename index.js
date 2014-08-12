@@ -7,7 +7,6 @@ var path = require('path');
 var fs = require('fs');
 var childProcess = require('child_process');
 var JSFtp = require('jsftp');
-var minimist = require('minimist');
 var q = require('q');
 var temp = require('temp');
 var mkdirp = require('mkdirp');
