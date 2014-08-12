@@ -2,8 +2,8 @@
 
 Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build server with just one command.
 
-[![NPM version](http://img.shields.io/npm/digitarald/flash-b2g.svg)](https://www.npmjs.org/package/flash-b2g)
-[![Dependency Status](http://img.shields.io/gemnasium/digitarald/flash-b2g.svg)](https://gemnasium.com/digitarald/flash-b2g)
+[![NPM version](http://img.shields.io/npm/v/flash-b2g.svg?style=flat)](https://www.npmjs.org/package/flash-b2g)
+[![Dependency Status](http://img.shields.io/gemnasium/digitarald/flash-b2g.svg?style=flat)](https://gemnasium.com/digitarald/flash-b2g)
 
 ## Dependencies
 
