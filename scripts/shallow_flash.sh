@@ -1,8 +1,8 @@
 #!/bin/bash
 #==========================================================================
-# 
+#
 # IMPORTANT: only for internal use!
-# 
+#
 # Description:
 #   This script was written for shallow flash the gaia and/or gecko.
 #
@@ -156,7 +156,7 @@ function adb_push_gaia() {
     GAIA_DIR=$1
     ## Adjusting user.js
     cat $GAIA_DIR/gaia/profile/user.js | sed -e "s/user_pref/pref/" > $GAIA_DIR/user.js
-    
+
     echo "### Pushing Gaia to device ..."
     run_adb shell mkdir -p /system/b2g/defaults/pref &&
     run_adb push $GAIA_DIR/gaia/profile/webapps /system/b2g/webapps &&
@@ -168,7 +168,7 @@ function adb_push_gaia() {
 ## shallow flash gaia
 function shallow_flash_gaia() {
     GAIA_ZIP_FILE=$1
-    
+
     if ! [[ -f $GAIA_ZIP_FILE ]]; then
         echo "### Cannot find $GAIA_ZIP_FILE file."
         exit 2
@@ -301,7 +301,7 @@ while true
 do
     case "$1" in
         -h|--help) helper; exit 0;;
-        -g|--gaia) 
+        -g|--gaia)
             FLASH_GAIA=true;
             case "$2" in
                 "") FLASH_GAIA_FILE="gaia.zip"; shift 2;;
@@ -313,7 +313,7 @@ do
                 "") FLASH_GECKO_FILE="b2g-18.0.en-US.android-arm.tar.gz"; shift 2;;
                 *) FLASH_GECKO_FILE=$2; shift 2;;
             esac ;;
-        --keep_profile) if [[ -e ./backup_restore_profile.sh ]]; then KEEP_PROFILE=true; else echo "### There is no backup_restore_profile.sh file."; fi; shift;;
+        --keep_profile) KEEP_PROFILE=true; shift;;
         -s)
             case "$2" in
                 "") shift 2;;
