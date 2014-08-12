@@ -130,12 +130,9 @@ var localB2gPath = path.join(dir, 'b2g-' + nameBits.join('-') + '.tar.gz');
 
 function setDeveloperPrefs() {
 	var prefs = {
-		'devtools.console.logger.forbid-certified-apps': false,
-		'devtools.console.logger.prompt-connection': false,
+		'devtools.debugger.forbid-certified-apps': false,
+		'devtools.debugger.prompt-connection': false,
 		'b2g.adb.timeout': 0,
-		// Bug 1001348: This optimization prevents debugger to fetch script sources
-		// of certified apps as well as chrome code:
-		'javascript.options.discardSystemSource': false,
 		// Reduce noise in logs: http://kb.mozillazine.org/Layout.css.report_errors
 		'layout.css.report_errors': false
 	};
@@ -143,7 +140,6 @@ function setDeveloperPrefs() {
 		'developer.menu.enabled': true,
 		'ftu.manifestURL': null,
 		'debugger.remote-mode': 'adb-devtools',
-		'devtools.debugger.remote-enabled': true,
 		'screen.timeout': 0,
 		'lockscreen.locked': false,
 		'lockscreen.enabled': false,
