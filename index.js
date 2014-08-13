@@ -140,6 +140,7 @@ function setDeveloperPrefs() {
 		'developer.menu.enabled': true,
 		'ftu.manifestURL': null,
 		'debugger.remote-mode': 'adb-devtools',
+		'devtools.debugger.remote-enabled': true,
 		'screen.timeout': 0,
 		'lockscreen.locked': false,
 		'lockscreen.enabled': false,
