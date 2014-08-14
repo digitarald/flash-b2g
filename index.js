@@ -133,9 +133,6 @@ function setDeveloperPrefs() {
 		'devtools.debugger.forbid-certified-apps': false,
 		'devtools.debugger.prompt-connection': false,
 		'b2g.adb.timeout': 0,
-		// Bug 1001348: This optimization prevents debugger to fetch script sources
-		// of certified apps as well as chrome code:
-		'javascript.options.discardSystemSource': false,
 		// Reduce noise in logs: http://kb.mozillazine.org/Layout.css.report_errors
 		'layout.css.report_errors': false
 	};
