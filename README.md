@@ -62,8 +62,8 @@ Making life easy for developers (read: not for consumers!). This does not enable
 
 Preferences:
 
-* `'devtools.console.logger.forbid-certified-apps': false` Enable debugging for certified apps
-* `'devtools.console.logger.prompt-connection': false` Disable prompt for remote debugging
+* `'devtools.debugger.forbid-certified-apps': false` Enable debugging for certified apps
+* `'devtools.debugger.prompt-connection': false` Disable prompt for remote debugging
 * `'b2g.adb.timeout': 0` Disable remote debugging timeout, ([bug 874484](https://bugzilla.mozilla.org/show_bug.cgi?id=874484))
 * `'javascript.options.discardSystemSource': false` Allow debugger to fetch script sources for certified apps, [bug 1001348](https://bugzilla.mozilla.org/show_bug.cgi?id=1001348)
 * `'layout.css.report_errors': false` Disable CSS errors in logcat

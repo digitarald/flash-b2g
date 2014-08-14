@@ -130,8 +130,8 @@ var localB2gPath = path.join(dir, 'b2g-' + nameBits.join('-') + '.tar.gz');
 
 function setDeveloperPrefs() {
 	var prefs = {
-		'devtools.console.logger.forbid-certified-apps': false,
-		'devtools.console.logger.prompt-connection': false,
+		'devtools.debugger.forbid-certified-apps': false,
+		'devtools.debugger.prompt-connection': false,
 		'b2g.adb.timeout': 0,
 		// Bug 1001348: This optimization prevents debugger to fetch script sources
 		// of certified apps as well as chrome code:
@@ -146,7 +146,7 @@ function setDeveloperPrefs() {
 		'devtools.debugger.remote-enabled': true,
 		'screen.timeout': 0,
 		'lockscreen.locked': false,
-		'lockscreen.enabled': false,
+		'lockscreen.enabled': false
 	};
 
 	// Wait for device
@@ -171,12 +171,16 @@ function setDeveloperPrefs() {
 			})).join(' && ');
 		console.log('Appending to prefs.js:\n', prefs);
 		return q.nfcall(childProcess.exec, 'adb shell "' +
-			cmds.replace(/"/g, '\\"') + '"');
+			cmds.replace(/"/g, '\\"') + '"', {
+				maxBuffer: 524288
+			});
 	})
 
 	// Fetch settings.json
 	.then(function() {
-		return q.nfcall(childProcess.exec, 'adb shell cat /system/b2g/defaults/settings.json');
+		return q.nfcall(childProcess.exec, 'adb shell cat /system/b2g/defaults/settings.json', {
+				maxBuffer: 524288
+			});
 	})
 
 	.spread(function(stdout) {
