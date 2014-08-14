@@ -5,22 +5,22 @@ Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build s
 [![NPM version](http://img.shields.io/npm/v/flash-b2g.svg?style=flat)](https://www.npmjs.org/package/flash-b2g)
 [![Dependency Status](http://img.shields.io/gemnasium/digitarald/flash-b2g.svg?style=flat)](https://gemnasium.com/digitarald/flash-b2g)
 
-## Dependencies
-
-* [Node 10.x](http://nodejs.org/download/)
-* [ADB](http://developer.android.com/tools/help/adb.html) from the [Android SDK](http://developer.android.com/sdk/index.html)
-
 ## What does it do?
 
-1. Downloads matching (by `device`, `channel` and `date`) builds from http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/
-2. Flashes gecko and gaia (a so called *[shallow flash](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh)*).
+1. **Downloads build**, matched by `device`, `channel` and `date`, from http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/
+2. **Flash Gecko and Gaia**, a so called *[shallow flash](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh)*)
 
 Shallow flash only! If you want to stay up-to-date **you need to flash the *latest base image* for your device yourself.** See [Flame software updates](https://developer.mozilla.org/en-US/Firefox_OS/Developer_phone_guide/Flame#Updating_your_Flame%27s_software).
 
 ### What are the alternatives?
 
-1. Download Gecko and Gaia from the [Mozilla B2G Nightly FTP](http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/) and use [shallow_flash.sh](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh) to flash the packages on your phone.
-2. Or [build Gecko and Gaia](https://developer.mozilla.org/en-US/Firefox_OS/Building) from source and [flash them](https://developer.mozilla.org/en-US/Firefox_OS/Installing_on_a_mobile_device) on your phone.
+* **Download Gecko and Gaia from the [Mozilla B2G Nightly FTP](http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/)** and use [shallow_flash.sh](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh) to flash the packages on your phone.
+* **[Build Gecko and Gaia](https://developer.mozilla.org/en-US/Firefox_OS/Building) from source** and [flash them](https://developer.mozilla.org/en-US/Firefox_OS/Installing_on_a_mobile_device) on your phone.
+
+## Dependencies
+
+* [Node 10.x](http://nodejs.org/download/)
+* [ADB](http://developer.android.com/tools/help/adb.html) from the [Android SDK](http://developer.android.com/sdk/index.html)
 
 ## Installation
 
@@ -33,7 +33,7 @@ Use the `flash-b2g` command as [global NPM](http://blog.nodejs.org/2011/03/23/np
 ## Usage
 
 ```bash
-> node index.js --help
+> flash-b2g --help
 
 Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build server (http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/).
 Usage: flash-b2g [device] [channel]

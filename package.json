@@ -1,6 +1,6 @@
 {
   "name": "flash-b2g",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build server.",
   "main": "index.js",
   "bin": {
