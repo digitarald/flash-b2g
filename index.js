@@ -126,7 +126,7 @@ var b2gFile = null;
 var gaiaFile = null;
 
 // Strip the regex bits that are filesystem wildcards or otherwise weird out.
-var safeNameBits = nameBits.join('-').replace(/\.\*/g, '');
+var safeNameBits = nameBits.join('-').replace(/[^a-z_-]/gi, '');
 var localGaiaPath = path.join(dir, 'gaia-' + safeNameBits + '.zip');
 var localB2gPath = path.join(dir, 'b2g-' + safeNameBits + '.tar.gz');
 
