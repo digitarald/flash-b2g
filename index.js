@@ -125,8 +125,10 @@ var b2gFilePath = null;
 var b2gFile = null;
 var gaiaFile = null;
 
-var localGaiaPath = path.join(dir, 'gaia-' + nameBits.join('-') + '.zip');
-var localB2gPath = path.join(dir, 'b2g-' + nameBits.join('-') + '.tar.gz');
+// Strip the regex bits that are filesystem wildcards or otherwise weird out.
+var safeNameBits = nameBits.join('-').replace(/\.\*/g, '');
+var localGaiaPath = path.join(dir, 'gaia-' + safeNameBits + '.zip');
+var localB2gPath = path.join(dir, 'b2g-' + safeNameBits + '.tar.gz');
 
 function setDeveloperPrefs() {
 	var prefs = {
@@ -284,7 +286,9 @@ q.fcall(function() {
 	}
 
 	var defer = q.defer();
-	var args = ['-y', '--gaia', localGaiaPath, '--gecko', localB2gPath];
+	// At least on linux bash, getopt defines that optional arguments need to be
+	// like "--opt=arg".  Only required arguments can do "--opt arg".
+	var args = ['-y', '--gaia=' + localGaiaPath, '--gecko=' + localB2gPath];
 	if (argv.profile) {
 		console.log('Attempting to keep profile')
 		args.push('--keep_profile')
