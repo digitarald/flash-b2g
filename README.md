@@ -8,9 +8,9 @@ Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build s
 ## What does it do?
 
 1. **Downloads build**, matched by `device`, `channel` and `date`, from http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/
-2. **Flash Gecko and Gaia**, a so called *[shallow flash](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh)*)
+2. **Flash Gecko and Gaia**, but not the underlying "Gonk" operating system kernel (a so called *[shallow flash](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh)*)
 
-Shallow flash only! If you want to stay up-to-date **you need to flash the *latest base image* for your device yourself.** See [Flame software updates](https://developer.mozilla.org/en-US/Firefox_OS/Developer_phone_guide/Flame#Updating_your_Flame%27s_software).
+Shallow flash only! If you want to update the Gonk layer, **you need to flash the *latest base image* for your device yourself.** See [Flame software updates](https://developer.mozilla.org/en-US/Firefox_OS/Developer_phone_guide/Flame#Updating_your_Flame%27s_software).
 
 ### What are the alternatives?
 
