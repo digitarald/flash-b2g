@@ -50,7 +50,8 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 		'local': 'l',
 		'eng': 'e',
 		'profile': 'p',
-		'remotify': 'r'
+		'remotify': 'r',
+		'help': 'h'
 	})
 	.boolean(['eng', 'local', 'profile', 'help', 'remotify', 'help'])
 	.default({
@@ -86,13 +87,15 @@ if (argv.date && argv.date != 'latest') {
 } else {
 	argv.date = null;
 }
+var env = process.env;
 
-// Configuration
+// Constants
 var FTP_HOST = 'ftp.mozilla.org';
 var FTP_URL = 'http://' + FTP_HOST;
 var FTP_PATH = '/pub/mozilla.org/b2g/nightly/';
 var SCRIPT_PATH = path.join(__dirname, 'scripts');
 var FLASH_SCRIPT_PATH = path.join(SCRIPT_PATH, 'shallow_flash.sh');
+var BACKUP_SCRIPT_PATH = path.join(SCRIPT_PATH, 'backup_restore_profile.sh');
 var TIMEOUT = 60 * 60 * 1000; // 1min
 var ADB = process.env.ADB || 'adb';
 
@@ -109,6 +112,10 @@ if (!dir) {
 		console.log('Created directory: %s', dir)
 	}
 }
+var profileDir = path.join(dir, 'flash-b2g-profile');
+// At least on linux bash, getopt defines that optional arguments need to be
+// like "--opt=arg".  Only required arguments can do "--opt arg".
+var argsSpace = (process.platform == 'linux') ? '=' : '';
 
 if (argv['only-remotify']) {
 	setDeveloperPrefs()
@@ -322,29 +329,42 @@ Promise.resolve().then(function() {
 	return promisify(childProcess.exec, ADB + ' wait-for-device')
 })
 
+.then(function() {
+	if (argv.profile) {
+		console.log('Exec backup_restore_profile.sh to back up');
+		return promisify(childProcess.exec, [
+			BACKUP_SCRIPT_PATH,
+			'-p' + argsSpace,
+			profileDir,
+			'-b'
+		].join(' '), {
+			cwd: SCRIPT_PATH
+		})
+
+		.then(function(stdout, stderr) {
+			if (stdout) {
+				console.log('[backup_restore_profile] '.grey + String(stdout).trim());
+			}
+			if (stderr) {
+				console.log('[backup_restore_profile] '.red + String(stderr).trim());
+			}
+		});
+	}
+})
+
 // Execute flash script
-.then(function executeFlash() {
-	var separator = (process.platform == 'linux') ? '=' : '';
-	// At least on linux bash, getopt defines that optional arguments need to be
-	// like "--opt=arg".  Only required arguments can do "--opt arg".
+.then(function executeFlash(stdout) {
 	var args = [
-		'--gaia' + separator,
+		'--gaia' + argsSpace,
 		localGaiaPath,
-		'--gecko' + separator,
+		'--gecko' + argsSpace,
 		localB2gPath,
 		'-y'
 	];
-	if (argv.profile) {
-		console.log('Attempting to keep profile')
-		args.push('--keep_profile')
-	}
-	console.log('Executing ' + ('shallow_flash.sh ' + args.join(' ')).grey.italic);
+	console.log('Exec ' + ('shallow_flash.sh ' + args.join(' ')).grey.italic);
 	return new Promise(function(resolve, reject) {
 		var flash = childProcess.spawn(FLASH_SCRIPT_PATH, args, {
-			cwd: tempDir,
-			env: {
-				PROFILE_HOME: path.join(dir, 'b2g-profile-' + argv.device)
-			}
+			cwd: SCRIPT_PATH
 		});
 		flash.stdout.on('data', function(data) {
 			console.log('[shallow_flash] '.grey + String(data).trim());
@@ -360,6 +380,30 @@ Promise.resolve().then(function() {
 			}
 		});
 	});
+})
+
+.then(function() {
+	if (argv.profile) {
+		console.log('Exec backup_restore_profile.sh to restore');
+		return promisify(childProcess.exec, [
+			BACKUP_SCRIPT_PATH,
+			'-p' + argsSpace,
+			profileDir,
+			'--no-reboot',
+			'-r'
+		].join(' '), {
+			cwd: SCRIPT_PATH
+		})
+
+		.then(function(stdout, stderr) {
+			if (stdout) {
+				console.log('[backup_restore_profile] '.grey + String(stdout).trim());
+			}
+			if (stderr) {
+				console.log('[backup_restore_profile] '.red + String(stderr).trim());
+			}
+		});
+	}
 })
 
 // Set developer prefs
