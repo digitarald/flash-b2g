@@ -1,7 +1,8 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
 'use strict';
 
+var os = require('os');
 var http = require('http');
 var path = require('path');
 var fs = require('fs');
@@ -287,9 +288,15 @@ q.fcall(function() {
 	}
 
 	var defer = q.defer();
-	// At least on linux bash, getopt defines that optional arguments need to be
-	// like "--opt=arg".  Only required arguments can do "--opt arg".
-	var args = ['-y', '--gaia=' + localGaiaPath, '--gecko=' + localB2gPath];
+
+	var args = ['-y']
+	// On Linux, getopt wants "--opt=arg", on Mac it expects "--opt arg".
+	if (os.type() === 'Darwin') {
+		args.push('--gaia', localGaiaPath, '--gecko', localB2gPath);
+	} else {
+		args.push('--gaia=' + localGaiaPath, '--gecko=' + localB2gPath);
+	}
+
 	if (argv.profile) {
 		console.log('Attempting to keep profile')
 		args.push('--keep_profile')
