@@ -324,16 +324,29 @@ Promise.resolve().then(function() {
 
 // Execute flash script
 .then(function executeFlash() {
-	var separator = (process.platform == 'linux') ? '=' : '';
-	// At least on linux bash, getopt defines that optional arguments need to be
-	// like "--opt=arg".  Only required arguments can do "--opt arg".
-	var args = [
-		'--gaia' + separator,
-		localGaiaPath,
-		'--gecko' + separator,
-		localB2gPath,
+    var args;
+    // On linux bash, getopt defines that optional arguments need to be like
+	// "--opt=arg".  Only required arguments can do "--opt" "arg".  On OS X it
+	// appears that the latter is required even for optional arguments.
+	var optionalArgsNeedEquals = (process.platform == 'linux');
+
+	if (optionalArgsNeedEquals) {
+		args = [
+			'--gaia=' + localGaiaPath,
+			'--gecko=' + localB2gPath,
+		];
+	} else {
+		args = [
+			'--gaia',
+			localGaiaPath,
+			'--gecko',
+			localB2gPath
+		];
+	}
+
+	args = args.concat([
 		'-y'
-	];
+	]);
 	if (argv.profile) {
 		console.log('Attempting to keep profile')
 		args.push('--keep_profile')
