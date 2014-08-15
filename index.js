@@ -73,6 +73,7 @@ var FTP_PATH = '/pub/mozilla.org/b2g/nightly/';
 var SCRIPT_PATH = path.join(__dirname, 'scripts');
 var FLASH_SCRIPT_PATH = path.join(SCRIPT_PATH, 'shallow_flash.sh');
 var TIMEOUT = 60 * 60 * 1000; // 1min
+var ADB = process.env.ADB || 'adb';
 
 // Set up dirs
 temp.track();
@@ -121,12 +122,11 @@ nameBits.push(dateBit);
 var pathMatch = new RegExp('^' + pathBits.join('-') + '$', 'i');
 var ftpPath = FTP_PATH;
 
-var b2gFilePath = null;
 var b2gFile = null;
 var gaiaFile = null;
 
 // Strip the regex bits that are filesystem wildcards or otherwise weird out.
-var safeNameBits = nameBits.join('-').replace(/[^a-z_-]/gi, '');
+var safeNameBits = nameBits.join('-').replace(/[^\w-]/gi, '');
 var localGaiaPath = path.join(dir, 'gaia-' + safeNameBits + '.zip');
 var localB2gPath = path.join(dir, 'b2g-' + safeNameBits + '.tar.gz');
 
@@ -143,21 +143,21 @@ function setDeveloperPrefs() {
 		'ftu.manifestURL': null,
 		'debugger.remote-mode': 'adb-devtools',
 		'devtools.debugger.remote-enabled': true,
-		'screen.timeout': 0,
+		'screen.timeout': 600, // 10min
 		'lockscreen.locked': false,
 		'lockscreen.enabled': false
 	};
 
 	// Wait for device
 	console.log('Waiting for device (is remote debugging on?)');
-	return q.nfcall(childProcess.exec, 'adb wait-for-device')
+	return q.nfcall(childProcess.exec, ADB + ' wait-for-device')
 
 	// Stop B2G
 	.then(function() {
 		console.log('Stopping system');
 		return q.nfcall(childProcess.exec, [
-			'adb remount', // really needed?
-			'adb shell stop b2g'
+			ADB + ' remount', // really needed?
+			ADB + ' shell stop b2g'
 		].join(' && '));
 	})
 
@@ -169,7 +169,7 @@ function setDeveloperPrefs() {
 					JSON.stringify(prefs[key]) + ');\' >> prefs.js';
 			})).join(' && ');
 		console.log('Appending to prefs.js:\n', prefs);
-		return q.nfcall(childProcess.exec, 'adb shell "' +
+		return q.nfcall(childProcess.exec, ADB + ' shell "' +
 			cmds.replace(/"/g, '\\"') + '"', {
 				maxBuffer: 524288
 			});
@@ -177,7 +177,7 @@ function setDeveloperPrefs() {
 
 	// Fetch settings.json
 	.then(function() {
-		return q.nfcall(childProcess.exec, 'adb shell cat /system/b2g/defaults/settings.json', {
+		return q.nfcall(childProcess.exec, ADB + ' shell cat /system/b2g/defaults/settings.json', {
 				maxBuffer: 524288
 			});
 	})
@@ -191,16 +191,17 @@ function setDeveloperPrefs() {
 		fs.writeFileSync(settingsPath, JSON.stringify(content));
 		console.log('Appending to settings.json:\n', settings);
 		return q.nfcall(childProcess.exec, [
-			'adb shell mount -o rw,remount /system',
-			'adb push ' + settingsPath + ' /system/b2g/defaults/settings.json',
-			'adb shell mount -o ro,remount /system'
+			ADB + ' shell mount -o rw,remount /system',
+			ADB + ' push ' + settingsPath + ' /system/b2g/defaults/settings.json',
+			ADB + ' shell mount -o ro,remount /system'
 		].join(' && '));
 	})
 
 	// Restart B2G
 	.then(function() {
 		console.log('Restarting system');
-		return q.nfcall(childProcess.exec, 'adb shell sync && adb shell start b2g')
+		return q.nfcall(childProcess.exec, ADB + ' shell sync && ' +
+			ADB + ' shell start b2g')
 	});
 };
 

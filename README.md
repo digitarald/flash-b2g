@@ -72,6 +72,6 @@ Settings:
 * `'developer.menu.enabled': true`
 * `'ftu.manifestURL': null` Disable First-Time-User experience
 * `'debugger.remote-mode': 'adb-devtools'` Enable full remote debugging
-* `'screen.timeout': 0` Disable screen timeout
+* `'screen.timeout': 600` 10min screen timeout
 * `'lockscreen.locked': false` Unlock screen on launch
 * `'lockscreen.enabled': false` Disable lockscreen
