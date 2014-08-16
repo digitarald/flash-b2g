@@ -13,16 +13,16 @@ Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build s
 ### Shallow flash?
 
 ```
-+------=--+
-|  Gaia   | ]                ]
-| ------- | ]- Shallow flash ]
-|  Gecko  | ]                ]- Base image flash
-| ------- |                  ]
-|  Gonk   |                  ]
-|         |
-|---------|
-|    ⊙    |
-+---------+
++-------=---+
+|   Gaia    | ]                ]
+|  -------  | ]- Shallow flash ]
+|   Gecko   | ]                ]- Base image flash
+|  -------  |                  ]
+|   Gonk    |                  ]
+|           |
+|-----------|
+|     ⊙     |
++-----------+
 ```
 
 Firefox OS has [three layers](http://en.wikipedia.org/wiki/Firefox_OS#Core_technologies), where most development happens in the `Gecko` (browser engine) and `Gaia` (user interface) layers. `Gonk` and lower contain proprietary bits like hardware drivers and RIL and are therefor not build by Mozilla.
