@@ -36,7 +36,7 @@ function promisify(fn) {
 }
 
 // Command-line arguments
-var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla\'s public build server (http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/).\nUsage: flash-b2g [device] [channel]')
+var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla\'s public build server (http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/).\nUsage: flash-b2g [device] [channel=central]')
 	.example('$0 flame 1.4', 'Flash a flame with 1.4 build.')
 	.example('$0 flame --folder ~/', 'Flash a flame with a nightly build (downloaded to ~/)')
 	.example('$0 flame --folder ~/ --local', 'Flash a Flame device with a previously downloaded build in ~/.')
@@ -55,7 +55,6 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 	})
 	.boolean(['eng', 'local', 'profile', 'help', 'remotify', 'help'])
 	.default({
-		device: 'flame',
 		channel: 'central',
 		date: 'latest'
 	})
@@ -68,13 +67,17 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 		profile: 'Keep profile (no promises)',
 		remotify: 'Set device into development mode',
 		help: 'Show this help'
-	});
+	})
+	.strict();
 var argv = yarg.argv;
-if (argv.help) {
+argv.device = (argv._[0] || argv.device || '').toLowerCase();
+if (argv.help || !argv.device) {
 	console.log(yarg.help());
+	if (!argv.device) {
+		console.log('Please provide a [device] argument!');
+	}
 	process.exit();
 }
-argv.device = (argv._[0] || argv.device).toLowerCase();
 argv.channel = String(argv._[1] || argv.channel);
 if (/^\d+$/.test(argv.channel)) {
 	argv.channel += '.0';
