@@ -118,7 +118,7 @@ if (!dir) {
 var profileDir = path.join(dir, 'flash-b2g-profile');
 // At least on linux bash, getopt defines that optional arguments need to be
 // like "--opt=arg".  Only required arguments can do "--opt arg".
-var argsSpace = (process.platform == 'linux') ? '=' : '';
+var argsSpace = (process.platform == 'linux') ? '=' : ' ';
 
 if (argv['only-remotify']) {
 	setDeveloperPrefs()
@@ -172,7 +172,7 @@ function setDeveloperPrefs() {
 	};
 
 	// Wait for device
-	console.log('Waiting for device (is remote debugging on?)');
+	console.log('Waiting for device (is remote debugging on?) …'.yellow);
 	return promisify(childProcess.exec, ADB + ' wait-for-device')
 
 	// Stop B2G
@@ -328,17 +328,16 @@ Promise.resolve().then(function() {
 })
 
 .then(function() {
-	console.log('Waiting for device (is remote debugging on?)');
+	console.log('Waiting for device (is remote debugging on?)  …'.yellow);
 	return promisify(childProcess.exec, ADB + ' wait-for-device')
 })
 
 .then(function() {
 	if (argv.profile) {
-		console.log('Exec backup_restore_profile.sh to back up');
+		console.log('Exec ' + 'backup_restore_profile.sh'.grey.italic + ' to back up');
 		return promisify(childProcess.exec, [
 			BACKUP_SCRIPT_PATH,
-			'-p' + argsSpace,
-			profileDir,
+			'-p' + argsSpace + profileDir,
 			'-b'
 		].join(' '), {
 			cwd: SCRIPT_PATH
@@ -358,40 +357,32 @@ Promise.resolve().then(function() {
 // Execute flash script
 .then(function executeFlash(stdout) {
 	var args = [
-		'--gaia' + argsSpace,
-		localGaiaPath,
-		'--gecko' + argsSpace,
-		localB2gPath,
+		'--gaia' + argsSpace + localGaiaPath,
+		'--gecko' + argsSpace + localB2gPath,
 		'-y'
-	];
-	console.log('Exec ' + ('shallow_flash.sh ' + args.join(' ')).grey.italic);
-	return new Promise(function(resolve, reject) {
-		var flash = childProcess.spawn(FLASH_SCRIPT_PATH, args, {
-			cwd: SCRIPT_PATH
-		});
-		flash.stdout.on('data', function(data) {
-			console.log('[shallow_flash] '.grey + String(data).trim());
-		});
-		flash.stderr.on('data', function(data) {
-			console.log('[shallow_flash] '.red + String(data).trim());
-		});
-		flash.on('close', function(code) {
-			if (code) {
-				reject('Error code from shallow_flash.sh!');
-			} else {
-				resolve();
-			}
-		});
+	].join(' ');
+	console.log('Exec ' + ('shallow_flash.sh ' + args).grey.italic);
+	console.log('This can take a bit, finishing with the device restarting …'.yellow);
+	return promisify(childProcess.exec, FLASH_SCRIPT_PATH + ' ' + args, {
+		cwd: SCRIPT_PATH
+	})
+
+	.then(function(stdout, stderr) {
+		if (stdout) {
+			console.log('[shallow_flash] '.grey + String(stdout).trim());
+		}
+		if (stderr) {
+			console.log('[shallow_flash] '.red + String(stderr).trim());
+		}
 	});
 })
 
 .then(function() {
 	if (argv.profile) {
-		console.log('Exec backup_restore_profile.sh to restore');
+		console.log('Exec ' + 'backup_restore_profile.sh'.grey.italic + ' to restore');
 		return promisify(childProcess.exec, [
 			BACKUP_SCRIPT_PATH,
-			'-p' + argsSpace,
-			profileDir,
+			'-p' + argsSpace + profileDir,
 			'--no-reboot',
 			'-r'
 		].join(' '), {
