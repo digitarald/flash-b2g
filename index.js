@@ -53,7 +53,7 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 		'remotify': 'r',
 		'help': 'h'
 	})
-	.boolean(['eng', 'local', 'profile', 'help', 'remotify', 'help'])
+	.boolean(['eng', 'local', 'profile', 'help', 'remotify', 'help', 'only-remotify'])
 	.default({
 		channel: 'central',
 		date: 'latest'
@@ -61,17 +61,19 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 	.describe({
 		device: 'Device (flame, helix, hamachi, …)',
 		channel: 'Channel (central, aurora, 1.4, …)',
-		date: 'Build date (regression window testing)',
-		eng: 'Engineering build (marionette testing)',
-		local: 'Use local files, skipping FTP',
+		date: 'Build date (for regression window testing)',
+		eng: 'Engineering build (for marionette testing)',
+		dir: 'Directory to keep downloads (defaults to temp)',
+		local: 'Use local files, skipping FTP (requires --dir)',
 		profile: 'Keep profile (no promises)',
 		remotify: 'Set device into development mode',
+		'only-remotify': 'Skip flashing, only set development mode',
 		help: 'Show this help'
 	})
 	.strict();
 var argv = yarg.argv;
 argv.device = (argv._[0] || argv.device || '').toLowerCase();
-if (argv.help || !argv.device) {
+if (argv.help || (!argv.device && !argv['only-remotify'])) {
 	console.log(yarg.help());
 	if (!argv.device) {
 		console.log('Please provide a [device] argument!');
@@ -258,6 +260,7 @@ function download() {
 	// List files in target dir
 	.then(function listTargetFiles(path) {
 		ftpPath += path + '/';
+		console.log('Listing files from %s', (FTP_HOST.underline + ftpPath).white);
 		return promisify([ftp, 'ls'], ftpPath);
 	})
 
