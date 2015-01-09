@@ -27,7 +27,7 @@ Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build s
 
 Firefox OS has [three layers](http://en.wikipedia.org/wiki/Firefox_OS#Core_technologies), where most development happens in the `Gecko` (browser engine) and `Gaia` (user interface) layers. `Gonk` and lower contain proprietary bits like hardware drivers and RIL and are therefor not build by Mozilla.
 
-For a full `base image flash` check [Flame software updates](https://developer.mozilla.org/en-US/Firefox_OS/Developer_phone_guide/Flame#Updating_your_Flame%27s_software) on MDN.
+For a full `base image flash` check [Flame software updates](https://developer.mozilla.org/en-US/Firefox_OS/Developer_phone_guide/Flame/Updating_your_Flame) on MDN.
 
 ### What are the alternatives?
 
@@ -53,24 +53,26 @@ Use the `flash-b2g` command as [global NPM](http://blog.nodejs.org/2011/03/23/np
 > flash-b2g --help
 
 Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build server (http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/).
-Usage: flash-b2g [device] [channel]
+Usage: flash-b2g [device] [channel=central]
 
 Examples:
-  flash-b2g flame 1.4                    Flash a flame with 1.4 build.
-  flash-b2g flame --folder ~/            Flash a flame with a nightly build (downloaded to ~/)
-  flash-b2g flame --folder ~/ --local    Flash a Flame device with a previously downloaded build in ~/.
-  flash-b2g hamachi aurora --eng         Flash an Hamachi device with an aurora engineering build.
+  flash-b2g flame-kk 2.0                    Flash a flame with 2.0 build.
+  flash-b2g flame-kk --folder ~/            Flash a flame with a nightly build (downloaded to ~/)
+  flash-b2g flame-kk --folder ~/ --local    Flash a Flame device with a previously downloaded build in ~/.
+  flash-b2g hamachi aurora --eng            Flash an Hamachi device with an aurora engineering build.
 
 
 Options:
-  --device, -i    Device (flame, helix, hamachi, …)       [default: "flame"]
-  --channel, -c   Channel (central, aurora, 1.4, …)       [default: "central"]
-  --date, -t      Build date (regression window testing)  [default: "latest"]
-  --eng, -e       Engineering build (marionette testing)
-  --local, -l     Use local files, skipping FTP
-  --profile, -p   Keep profile (no promises)
-  --remotify, -r  Set device into development mode
-  --help          Show this help
+  --device, -i     Device (flame-kk [kitkat base image], flame, helix, hamachi, …)
+  --channel, -c    Channel (central, aurora, 1.4, …)                                [default: "central"]
+  --date, -t       Build date (for regression window testing)                       [default: "latest"]
+  --eng, -e        Engineering build (for marionette testing)
+  --dir, -d        Directory to keep downloads (defaults to temp)
+  --local, -l      Use local files, skipping FTP (requires --dir)
+  --profile, -p    Keep profile (no promises)
+  --remotify, -r   Set device into development mode
+  --only-remotify  Skip flashing, only set development mode
+  --help, -h       Show this help
 ```
 
 ### Settings for `--remotify`
