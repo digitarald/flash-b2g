@@ -1,14 +1,18 @@
 #!/bin/bash
 #==========================================================================
-#
-# IMPORTANT: only for internal use!
-#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#==========================================================================
 # Description:
 #   This script was written for shallow flash the gaia and/or gecko.
 #
 # Author: Askeing fyen@mozilla.com
+#         Contribs from slee steve@opendirective.com
 # History:
 #   2013/08/02 Askeing: v1.0 First release.
+#   2014/08/09 Added Cygwin support by revelon.
+#   2014/09/24 Fixed Cygwin path problems & set x file attrib for gecko
 #==========================================================================
 
 
@@ -22,11 +26,7 @@ FLASH_GAIA=false
 FLASH_GAIA_FILE=""
 FLASH_GECKO=false
 FLASH_GECKO_FILE=""
-# for other bash script tools call.
-case `uname` in
-    "Linux") SP="";;
-    "Darwin") SP=" ";;
-esac
+NO_FTU=${NO_FTU:-false}
 
 ####################
 # Functions        #
@@ -44,7 +44,7 @@ function helper(){
     echo -e "-h|--help\tDisplay help."
     echo -e "Example:"
     case `uname` in
-        "Linux")
+        "Linux"|"CYGWIN"*)
             echo -e "  Flash gaia.\t\t./shallow_flash.sh --gaia=gaia.zip"
             echo -e "  Flash gecko.\t\t./shallow_flash.sh --gecko=b2g-18.0.en-US.android-arm.tar.gz"
             echo -e "  Flash gaia and gecko.\t./shallow_flash.sh -ggaia.zip -Gb2g-18.0.en-US.android-arm.tar.gz";;
@@ -61,7 +61,7 @@ function run_adb()
 {
     # TODO: Bug 875534 - Unable to direct ADB forward command to inari devices due to colon (:) in serial ID
     # If there is colon in serial number, this script will have some warning message.
-	adb $ADB_FLAGS $@
+    adb $ADB_FLAGS "$@"
 }
 
 ## make sure user want to shallow flash
@@ -74,21 +74,23 @@ function make_sure() {
         echo -e "Gecko: $FLASH_GECKO_FILE "
     fi
     read -p "to your $ADB_DEVICE? [y/N]" isFlash
-    test "$isFlash" != "y"  && test "$isFlash" != "Y" && echo -e "bye bye." && exit 0
+
+    [ "y" = "$isFlash" ] || [ "Y" = "$isFlash" ] \
+        || { echo -e "bye bye." && exit 0 ; }
 }
 
 ## check the return code, exit if return code is not zero.
 function check_exit_code() {
-	RET=$1
-	ERROR_MSG=$2
-	if [[ ${RET} != 0 ]]; then
+    RET=$1
+    ERROR_MSG=$2
+    if [[ ${RET} != 0 ]]; then
         if [[ -z ${ERROR_MSG} ]]; then
             echo "### Failed!"
         else
-        	echo "### Failed: ${ERROR_MSG}"
+            echo "### Failed: ${ERROR_MSG}"
         fi
         exit 1
-	fi
+    fi
 }
 
 function check_adb_result() {
@@ -137,31 +139,35 @@ function adb_reboot() {
 ## clean cache, gaia (webapps) and profiles
 function adb_clean_gaia() {
     echo "### Cleaning Gaia and Profiles ..."
-    run_adb shell rm -r /cache/* &&
-    run_adb shell rm -r /data/b2g/* &&
-    run_adb shell rm -r /data/local/storage/persistent/* &&
-    run_adb shell rm -r /data/local/svoperapps &&
-    run_adb shell rm -r /data/local/webapps &&
-    run_adb shell rm -r /data/local/user.js &&
-    run_adb shell rm -r /data/local/permissions.sqlite* &&
-    run_adb shell rm -r /data/local/OfflineCache &&
-    run_adb shell rm -r /data/local/indexedDB &&
-    run_adb shell rm -r /data/local/debug_info_trigger &&
-    run_adb shell rm -r /system/b2g/webapps &&
+    run_adb shell "rm -r /cache/*" &&
+    run_adb shell "rm -r /data/b2g/*" &&
+    run_adb shell "rm -r /data/local/storage/persistent/*" &&
+    run_adb shell "rm -r /data/local/svoperapps" &&
+    run_adb shell "rm -r /data/local/webapps" &&
+    run_adb shell "rm -r /data/local/user.js" &&
+    run_adb shell "rm -r /data/local/permissions.sqlite*" &&
+    run_adb shell "rm -r /data/local/OfflineCache" &&
+    run_adb shell "rm -r /data/local/indexedDB" &&
+    run_adb shell "rm -r /data/local/debug_info_trigger" &&
+    run_adb shell "rm -r /system/b2g/webapps" &&
     echo "### Cleaning Done."
 }
 
 ## push gaia into device
 function adb_push_gaia() {
     GAIA_DIR=$1
+    LOCAL_GAIA_DIR=$GAIA_DIR
+    if [[ `uname` == "CYGWIN"* ]]; then
+        ## Adb on win32 is not cygwin so doesn't handle full posix paths for local access
+        LOCAL_GAIA_DIR=$(cygpath -w $GAIA_DIR);
+    fi
     ## Adjusting user.js
-    cat $GAIA_DIR/gaia/profile/user.js | sed -e "s/user_pref/pref/" > $GAIA_DIR/user.js
-
-    echo "### Pushing Gaia to device ..."
+    cat $GAIA_DIR/gaia/profile/user.js | sed -e "s/user_pref/pref/" > $GAIA_DIR/user.js &&
+    echo "### Pushing Gaia to device ..." &&
     run_adb shell mkdir -p /system/b2g/defaults/pref &&
-    run_adb push $GAIA_DIR/gaia/profile/webapps /system/b2g/webapps &&
-    run_adb push $GAIA_DIR/user.js /system/b2g/defaults/pref &&
-    run_adb push $GAIA_DIR/gaia/profile/settings.json /system/b2g/defaults &&
+    run_adb push "$LOCAL_GAIA_DIR/gaia/profile/webapps" /system/b2g/webapps &&
+    run_adb push "$LOCAL_GAIA_DIR/user.js" /system/b2g/defaults/pref &&
+    run_adb push "$LOCAL_GAIA_DIR/gaia/profile/settings.json" /system/b2g/defaults &&
     echo "### Push Done."
 }
 
@@ -209,12 +215,32 @@ function unzip_file() {
     #ls -LR $DEST_DIR
 }
 
+## clean /system/media/ and extra gecko files
+function adb_clean_extra_gecko_files() {
+    echo "### Cleaning Extra System Files ..."
+    run_adb shell "rm -r /system/media"
+    echo "### Cleaning Done."
+
+    echo "### Cleaning Extra Gecko Files ..."
+    GECKO_DIR=$1
+    REMOVED_FILES="$(cat <(ls "$GECKO_DIR/b2g") <(ls "$GECKO_DIR/b2g") <(run_adb shell "ls /system/b2g" | tr -d '\r') | sort | uniq -u)"
+    if [[ "$REMOVED_FILES" != "" ]]; then
+        for REMOVED_FILE in $REMOVED_FILES; do
+            if [[ "$REMOVED_FILE" != "defaults" ]] && [[ "$REMOVED_FILE" != "webapps" ]]; then
+        echo "##### Removing /system/b2g/$REMOVED_FILE ..."
+                run_adb shell "rm -r /system/b2g/$REMOVED_FILE"
+            fi
+        done
+    fi
+    echo "### Cleaning Done."
+}
+
 ## shallow flash gecko
 function shallow_flash_gecko() {
     GECKO_TAR_FILE=$1
 
     if ! [[ -f $GECKO_TAR_FILE ]]; then
-        echo "### Cannot finnd $GECKO_TAR_FILE file."
+        echo "### Cannot find $GECKO_TAR_FILE file."
         exit 2
     fi
 
@@ -229,14 +255,30 @@ function shallow_flash_gecko() {
         TMP_DIR=`mktemp -d -t shallowflashgecko.XXXXXXXXXXXX`
     fi
 
-	## push gecko into device
+    ## push gecko into device
+    LOCAL_TMP_DIR=$TMP_DIR
+    if [[ `uname` == "CYGWIN"* ]]; then
+        ## Adb on win32 is not cygwin so doesn't handle full posix paths for local access
+        LOCAL_TMP_DIR=$(cygpath -w $TMP_DIR);
+    fi
     untar_file $GECKO_TAR_FILE $TMP_DIR &&
     echo "### Pushing Gecko to device..." &&
-    run_adb push $TMP_DIR/b2g /system/b2g &&
+    adb_clean_extra_gecko_files $LOCAL_TMP_DIR &&
+    run_adb push "$LOCAL_TMP_DIR/b2g" /system/b2g &&
     echo "### Push Done."
     check_exit_code $? "Pushing Gecko to device failed."
 
     rm -rf $TMP_DIR
+
+    if [[ `uname` == "CYGWIN"* ]]; then
+        # reset excutable attribute as is not supported on Cygwin
+        echo "### Setting executable file attributes..." &&
+        XFILES=$(tar -tvf $GECKO_TAR_FILE | awk '$1 ~ /^-.*x$/ {print "/system/" $NF}')
+        echo $XFILES
+        run_adb shell chmod 777 $XFILES
+        echo "### Setting attributes Done."
+        check_exit_code $? "Setting executable file attributes failed."
+    fi
 }
 
 ## untar tar.gz file
@@ -259,14 +301,14 @@ function untar_file() {
 function backup_profile() {
     DEST_DIR=$1
     echo "### Profile back up to ${DEST_DIR}"
-    bash ./backup_restore_profile.sh -p${SP}${DEST_DIR} --no-reboot -b
+    bash ./backup_restore_profile.sh -p ${DEST_DIR} --no-reboot -b
 }
 
 ## option $1 is temp_folder
 function restore_profile() {
     DEST_DIR=$1
     echo "### Restore Profile from ${DEST_DIR}"
-    bash ./backup_restore_profile.sh -p${SP}${DEST_DIR} --no-reboot -r
+    bash ./backup_restore_profile.sh -p ${DEST_DIR} --no-reboot -r
 }
 
 ## option $1 is temp_folder
@@ -286,7 +328,7 @@ if [[ $# = 0 ]]; then echo "Nothing specified"; helper; exit 0; fi
 
 ## distinguish platform
 case `uname` in
-    "Linux")
+    "Linux"|"CYGWIN"*)
         ## add getopt argument parsing
         TEMP=`getopt -o g::G::s::yh --long gaia::,gecko::,keep_profile,help \
         -n 'invalid option' -- "$@"`
@@ -304,16 +346,16 @@ do
         -g|--gaia)
             FLASH_GAIA=true;
             case "$2" in
-                "") FLASH_GAIA_FILE="gaia.zip"; shift 2;;
+                "") echo -e "Please specify the gaia path.\nTry '--help' for more information.";exit 1;;
                 *) FLASH_GAIA_FILE=$2; shift 2;;
             esac ;;
         -G|--gecko)
             FLASH_GECKO=true;
             case "$2" in
-                "") FLASH_GECKO_FILE="b2g-18.0.en-US.android-arm.tar.gz"; shift 2;;
+                "") echo -e "Please specify the gecko path.\nTry '--help' for more information."; exit 1;;
                 *) FLASH_GECKO_FILE=$2; shift 2;;
             esac ;;
-        --keep_profile) KEEP_PROFILE=true; shift;;
+        --keep_profile) if [[ -e ./backup_restore_profile.sh ]]; then KEEP_PROFILE=true; else echo "### There is no backup_restore_profile.sh file."; fi; shift;;
         -s)
             case "$2" in
                 "") shift 2;;
@@ -365,6 +407,16 @@ if [[ $KEEP_PROFILE == true ]] && ([[ $FLASH_GAIA == true ]] || [[ $FLASH_GECKO 
     backup_profile ${TMP_PROFILE_DIR}
 fi
 
+
+####################
+# Processing Gecko #
+####################
+if [[ $FLASH_GECKO == true ]]; then
+    echo "### Processing Gecko: $FLASH_GECKO_FILE"
+    shallow_flash_gecko $FLASH_GECKO_FILE
+fi
+
+
 ####################
 # Processing Gaia  #
 ####################
@@ -375,12 +427,16 @@ fi
 
 
 ####################
-# Processing Gecko #
+# NO FTU           #
 ####################
-if [[ $FLASH_GECKO == true ]]; then
-    echo "### Processing Gecko: $FLASH_GECKO_FILE"
-    shallow_flash_gecko $FLASH_GECKO_FILE
+if [[ ${NO_FTU} == true ]]; then
+    if [[ -f ./disable_ftu.py ]]; then
+        echo "### Processing NO FTU..."
+        ./disable_ftu.py
+        echo "### NO FTU done."
+    fi
 fi
+
 
 ####################
 # Restore Profile  #
@@ -389,6 +445,7 @@ if [[ $KEEP_PROFILE == true ]] && ([[ $FLASH_GAIA == true ]] || [[ $FLASH_GECKO 
     restore_profile ${TMP_PROFILE_DIR}
     remove_profile ${TMP_PROFILE_DIR}
 fi
+
 
 ####################
 # ADB Work         #
