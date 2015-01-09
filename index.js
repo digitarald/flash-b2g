@@ -37,9 +37,9 @@ function promisify(fn) {
 
 // Command-line arguments
 var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla\'s public build server (http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/).\nUsage: flash-b2g [device] [channel=central]')
-	.example('$0 flame 1.4', 'Flash a flame with 1.4 build.')
-	.example('$0 flame --folder ~/', 'Flash a flame with a nightly build (downloaded to ~/)')
-	.example('$0 flame --folder ~/ --local', 'Flash a Flame device with a previously downloaded build in ~/.')
+	.example('$0 flame-kk 2.0', 'Flash a flame with 2.0 build.')
+	.example('$0 flame-kk --folder ~/', 'Flash a flame with a nightly build (downloaded to ~/)')
+	.example('$0 flame-kk --folder ~/ --local', 'Flash a Flame device with a previously downloaded build in ~/.')
 	.example('$0 hamachi aurora --eng', 'Flash an Hamachi device with an aurora engineering build.')
 	.string([1, 'device', 'channel', 'date'])
 	.alias({
@@ -59,7 +59,7 @@ var yarg = yargs.usage('Shallow-flash Gecko and Gaia on Firefox OS devices from 
 		date: 'latest'
 	})
 	.describe({
-		device: 'Device (flame, helix, hamachi, …)',
+		device: 'Device (flame-kk [kitkat base image], flame, helix, hamachi, …)',
 		channel: 'Channel (central, aurora, 1.4, …)',
 		date: 'Build date (for regression window testing)',
 		eng: 'Engineering build (for marionette testing)',
