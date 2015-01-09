@@ -186,20 +186,6 @@ function setDeveloperPrefs() {
 		].join(' && '));
 	})
 
-	// Push preferences
-	.then(function pushPreferences() {
-		var cmds = ['cd /data/b2g/mozilla/*.default/']
-			.concat(Object.keys(prefs).map(function(key) {
-				return 'echo \'user_pref(' + JSON.stringify(key) + ', ' +
-					JSON.stringify(prefs[key]) + ');\' >> prefs.js';
-			})).join(' && ');
-		console.log('Appending to prefs.js:\n', prefs);
-		return promisify(childProcess.exec, ADB + ' shell "' +
-			cmds.replace(/"/g, '\\"') + '"', {
-				maxBuffer: 524288
-			});
-	})
-
 	// Fetch settings.json
 	.then(function pullSettings() {
 		return promisify(childProcess.exec, ADB + ' shell cat /system/b2g/defaults/settings.json', {
@@ -220,6 +206,20 @@ function setDeveloperPrefs() {
 			ADB + ' push ' + settingsPath + ' /system/b2g/defaults/settings.json',
 			ADB + ' shell mount -o ro,remount /system'
 		].join(' && '));
+	})
+
+	// Push preferences
+	.then(function pushPreferences() {
+		var cmds = ['cd /data/b2g/mozilla/*.default/']
+			.concat(Object.keys(prefs).map(function(key) {
+				return 'echo \'user_pref(' + JSON.stringify(key) + ', ' +
+					JSON.stringify(prefs[key]) + ');\' >> prefs.js';
+			})).join(' && ');
+		console.log('Appending to prefs.js:\n', prefs);
+		return promisify(childProcess.exec, ADB + ' shell "' +
+			cmds.replace(/"/g, '\\"') + '"', {
+				maxBuffer: 524288
+			});
 	})
 
 	// Restart B2G
@@ -415,6 +415,6 @@ Promise.resolve().then(function() {
 	console.log('✓ %s flashed to %s!'.bold.green, argv.device, argv.channel);
 	process.exit();
 }, function(err) {
-	console.error(String(err).bold.red);
+	console.error(String(err).bold.red, err);
 	process.exit(1);
 });
