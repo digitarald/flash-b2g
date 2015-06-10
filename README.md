@@ -10,7 +10,7 @@ Shallow-flash Gecko and Gaia on Firefox OS devices from Mozilla's public build s
 1. **Downloads build**, matched by `device`, `channel` and `date`, from http://ftp.mozilla.org/pub/mozilla.org/b2g/nightly/
 2. **Flash Gecko and Gaia**, a so called *[shallow flash](https://github.com/Mozilla-TWQA/B2G-flash-tool/blob/master/shallow_flash.sh)*)
 
-### Shallow flash?
+### What is `Shallow Flash`?
 
 ```
 +-------=---+
@@ -77,16 +77,16 @@ Options:
 
 ### Settings for `--remotify`
 
-Making life easy for developers (read: not for consumers!). This does not enable remote debugging but also all the little hidden preferences that make development easier, like disabling lockscreen (which would prevent remote debugging) or the remote debugging prompt.
+Making life easy for developers (read: not for consumers!). This does not only enable remote debugging but also all the little hidden preferences that make development easier, like disabling lockscreen (which would prevent remote debugging) and the annoying remote debugging prompt.
 
-Preferences:
+#### Preferences
 
 * `'devtools.debugger.forbid-certified-apps': false` Enable debugging for certified apps
 * `'devtools.debugger.prompt-connection': false` Disable prompt for remote debugging
 * `'b2g.adb.timeout': 0` Disable remote debugging timeout, ([bug 874484](https://bugzilla.mozilla.org/show_bug.cgi?id=874484))
 * `'layout.css.report_errors': false` Disable CSS errors in logcat
 
-Settings:
+#### Settings
 
 * `'developer.menu.enabled': true`
 * `'ftu.manifestURL': null` Disable First-Time-User experience
