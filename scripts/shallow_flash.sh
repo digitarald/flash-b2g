@@ -32,8 +32,8 @@ NO_FTU=${NO_FTU:-false}
 # Functions        #
 ####################
 
-## helper function
-function helper(){
+## Show help text. exits cleanly or with exit code in $1.
+function helper() {
     echo -e "This script was written for shallow flash of gaia and/or gecko.\n"
     echo -e "Usage: ./shallow_flash.sh [parameters]"
     echo -e "-g|--gaia\tFlash the gaia (zip format) onto your device."
@@ -53,12 +53,15 @@ function helper(){
             echo -e "  Flash gecko.\t\t./shallow_flash.sh --gecko b2g-18.0.en-US.android-arm.tar.gz"
             echo -e "  Flash gaia and gecko.\t./shallow_flash.sh -g gaia.zip -G b2g-18.0.en-US.android-arm.tar.gz";;
     esac
-    exit 0
+    if [ "$1" != "" ]; then
+        exit $1
+    else
+        exit 0
+    fi
 }
 
 ## adb with flags
-function run_adb()
-{
+function run_adb() {
     # TODO: Bug 875534 - Unable to direct ADB forward command to inari devices due to colon (:) in serial ID
     # If there is colon in serial number, this script will have some warning message.
     adb $ADB_FLAGS "$@"
@@ -324,7 +327,7 @@ function remove_profile() {
 #########################
 
 ## show helper if nothing specified
-if [[ $# = 0 ]]; then echo "Nothing specified"; helper; exit 0; fi
+if [[ $# = 0 ]]; then echo "No action specified!"; echo; helper; fi
 
 ## distinguish platform
 case `uname` in
@@ -342,7 +345,7 @@ esac
 while true
 do
     case "$1" in
-        -h|--help) helper; exit 0;;
+        -h|--help) helper;;
         -g|--gaia)
             FLASH_GAIA=true;
             case "$2" in
@@ -364,7 +367,7 @@ do
         -y) VERY_SURE=true; shift;;
         --) shift;break;;
         "") shift;break;;
-        *) helper; echo error occured; exit 1;;
+        *) echo "Invalid argument: $1"; echo; helper 1;;
     esac
 done
 
